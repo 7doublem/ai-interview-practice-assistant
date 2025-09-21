@@ -4,7 +4,7 @@ A modern, AI-powered interview practice application built with Next.js, React, a
 
 ## 🌐 Live Demo
 
-**Try AVA now**: [https://ava-mvp.vercel.app](https://ava-mvp.vercel.app)
+**Try AVA now**: [https://ava-kxblecyju-7doublems-projects.vercel.app](https://ava-kxblecyju-7doublems-projects.vercel.app)
 
 ## 🚀 Features
 
@@ -26,7 +26,7 @@ A modern, AI-powered interview practice application built with Next.js, React, a
 - **Styling**: Tailwind CSS with custom animations
 - **Icons**: Lucide React
 - **AI Integration**: OpenAI GPT-4o-mini
-- **Deployment**: Vercel (recommended)
+- **Deployment**: Vercel
 
 ## 📋 Prerequisites
 
@@ -180,7 +180,7 @@ The application uses OpenAI's GPT-4o-mini model for generating structured feedba
 
 ## 🚀 Deployment
 
-### Vercel (Recommended)
+### Vercel
 
 1. Push your code to GitHub
 2. Connect your repository to Vercel
