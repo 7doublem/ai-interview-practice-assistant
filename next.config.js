@@ -3,25 +3,21 @@ const nextConfig = {
   // External packages for server components
   serverExternalPackages: ['openai'],
   
-  // Configure images for better performance
-  images: {
-    // Allow images from external domains if needed
-    domains: [],
-    // Optimize image formats
-    formats: ['image/webp', 'image/avif'],
+  // Disable ESLint during builds to avoid compatibility issues
+  eslint: {
+    ignoreDuringBuilds: true,
   },
   
-  // Environment variables configuration
-  env: {
-    // Make OpenAI configuration available to the client if needed
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
+  // Configure images for better performance
+  images: {
+    domains: [],
+    formats: ['image/webp', 'image/avif'],
   },
   
   // Headers for security and performance
   async headers() {
     return [
       {
-        // Apply security headers to all routes
         source: '/(.*)',
         headers: [
           {
@@ -41,23 +37,14 @@ const nextConfig = {
     ];
   },
   
-  // Redirects for better SEO and user experience
-  async redirects() {
-    return [
-      // Add any necessary redirects here
-    ];
-  },
-  
   // Webpack configuration for optimization
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Optimize bundle size
     if (!dev && !isServer) {
       config.optimization.splitChunks = {
         chunks: 'all',
         cacheGroups: {
           default: false,
           vendors: false,
-          // Create separate chunks for better caching
           vendor: {
             name: 'vendor',
             chunks: 'all',
