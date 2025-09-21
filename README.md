@@ -201,6 +201,10 @@ npm run build
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## 🎨 Assets
+
+- **Robot SVG**: Custom-designed friendly robot mascot (original artwork)
+
 ## 🆘 Troubleshooting
 
 ### Common Issues
