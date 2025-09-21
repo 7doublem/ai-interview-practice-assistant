@@ -4,7 +4,9 @@ A modern, AI-powered interview practice application built with Next.js, React, a
 
 ## 🌐 Live Demo
 
-**Try AVA now**: [https://ava-kxblecyju-7doublems-projects.vercel.app](https://ava-kxblecyju-7doublems-projects.vercel.app)
+**Try AVA now**: [https://ava-mvp.vercel.app](https://ava-mvp.vercel.app)
+
+> **Note**: If you encounter a 404 error, the application is working locally. The Vercel deployment may need configuration adjustments in the dashboard.
 
 ## 🚀 Features
 
