@@ -119,18 +119,22 @@ export default function HomePage() {
       {/* Main Content - Optimized for above-the-fold viewing */}
       <main className="flex-1 flex flex-col items-center justify-start px-4 py-2 space-y-4 max-w-6xl mx-auto w-full">
         
-                {/* Progress Indicator */}
-                <ProgressIndicator 
-                  currentQuestion={currentQuestionIndex + 1}
-                  totalQuestions={totalQuestions}
-                  completedCount={completedCount}
-                />
+                {/* Progress Indicator - only show when session is not complete */}
+                {!isSessionComplete && (
+                  <ProgressIndicator 
+                    currentQuestion={currentQuestionIndex + 1}
+                    totalQuestions={totalQuestions}
+                    completedCount={completedCount}
+                  />
+                )}
 
-        {/* Question Card */}
-        <QuestionCard 
-          questionNumber={currentQuestionIndex + 1}
-          question={currentQuestion}
-        />
+        {/* Question Card - only show when session is not complete */}
+        {!isSessionComplete && (
+          <QuestionCard 
+            questionNumber={currentQuestionIndex + 1}
+            question={currentQuestion}
+          />
+        )}
 
         {/* Answer Card - only show when not reviewing */}
         {!isSessionComplete && !isReviewing && (
@@ -200,7 +204,7 @@ export default function HomePage() {
                 onClick={handleNextQuestion}
                 className="px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-200 transform bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30 hover:-translate-y-0.5 hover:from-purple-700 hover:to-blue-700"
               >
-                Go to Next Question
+                {currentQuestionIndex === totalQuestions - 1 ? 'Complete Session' : 'Go to Next Question'}
               </button>
             </div>
           </div>
@@ -253,9 +257,9 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center py-4 text-gray-500 text-sm">
-        <p>© 2024 AVA - AI Interview Practice Assistant</p>
-      </footer>
+              <footer className="text-center py-4 text-gray-500 text-sm">
+                <p>© 2025 AVA - AI Interview Practice Assistant</p>
+              </footer>
     </div>
   );
 }
