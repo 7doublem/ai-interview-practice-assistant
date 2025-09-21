@@ -2,12 +2,19 @@
 
 A modern, AI-powered interview practice application built with Next.js, React, and TypeScript. AVA helps students prepare for medical school interviews by providing structured, supportive feedback on their responses to common interview questions.
 
+## 🌐 Live Demo
+
+**Try AVA now**: [https://ava-mvp.vercel.app](https://ava-mvp.vercel.app)
+
 ## 🚀 Features
 
 - **5 Hardcoded Interview Questions**: Curated questions specifically for medical school preparation
-- **AI-Powered Feedback**: Structured feedback using OpenAI's GPT-3.5-turbo model
+- **AI-Powered Feedback**: Structured feedback using OpenAI's GPT-4o-mini model
+- **Two-State Q&A Flow**: Clean answering state (textarea + submit) and reviewing state (feedback + next question)
+- **Enter-to-Submit**: Press Enter to submit answers, Shift+Enter for new lines
+- **AVA Robot Mascot**: Friendly robot character with custom SVG design
 - **Beautiful UI**: Clean, student-friendly interface with purple-to-blue gradients
-- **Progress Tracking**: Visual progress indicator and scoring system
+- **Progress Tracking**: Visual progress indicator based on completed submissions
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 - **Error Handling**: Graceful handling of API errors and network issues
 - **Smooth Animations**: Hover effects, loading spinners, and fade-in transitions
@@ -18,7 +25,7 @@ A modern, AI-powered interview practice application built with Next.js, React, a
 - **Frontend**: Next.js 15, React 18, TypeScript
 - **Styling**: Tailwind CSS with custom animations
 - **Icons**: Lucide React
-- **AI Integration**: OpenAI GPT-3.5-turbo
+- **AI Integration**: OpenAI GPT-4o-mini
 - **Deployment**: Vercel (recommended)
 
 ## 📋 Prerequisites
@@ -33,8 +40,8 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/ava-mvp.git
-cd ava-mvp
+git clone https://github.com/7doublem/ai-interview-practice-assistant.git
+cd ai-interview-practice-assistant
 ```
 
 ### 2. Install Dependencies
@@ -81,8 +88,11 @@ ava-mvp/
 │   ├── components/            # React components
 │   │   ├── Header.tsx         # App header with AVA branding
 │   │   ├── ProgressIndicator.tsx # Progress tracking component
-│   │   ├── QuestionDisplay.tsx   # Question presentation
-│   │   ├── AnswerInput.tsx       # Text input for answers
+│   │   ├── QuestionCard.tsx      # Question presentation
+│   │   ├── AnswerCard.tsx        # Text input for answers with Enter-to-submit
+│   │   ├── RobotMascot.tsx       # AVA robot mascot component
+│   │   ├── AnswerInput.tsx       # Legacy answer input component
+│   │   ├── QuestionDisplay.tsx   # Legacy question display component
 │   │   ├── FeedbackDisplay.tsx   # AI feedback presentation
 │   │   └── FinalResults.tsx      # Session completion screen
 │   ├── data/                  # Static data
@@ -90,7 +100,9 @@ ava-mvp/
 │   └── types/                 # TypeScript type definitions
 │       └── index.ts           # Application interfaces
 ├── public/                    # Static assets
-├── tailwind.config.ts         # Tailwind CSS configuration
+│   └── images/               # AVA robot mascot SVG
+├── tailwind.config.js        # Tailwind CSS configuration
+├── postcss.config.js         # PostCSS configuration
 ├── next.config.js            # Next.js configuration
 └── README.md                 # This file
 ```
@@ -115,11 +127,31 @@ ava-mvp/
 - **Loading states**: Spinning indicators and pulse effects
 - **Transitions**: 200ms ease-in-out for all interactions
 
+## 🎯 Two-State Q&A Flow
+
+AVA uses a clean two-state system for the interview practice experience:
+
+### State A: Answering
+- **Complete Answer Card**: Shows textarea, helper text, and submit button
+- **Enter-to-Submit**: Press Enter to submit, Shift+Enter for new lines
+- **Character Counter**: Real-time character count display
+- **Loading States**: Submit button shows "Submitting..." during API calls
+
+### State B: Reviewing
+- **Complete Unmounting**: Answer card disappears entirely
+- **AVA Feedback Display**: Shows structured feedback as sibling component
+- **Go to Next Question**: Single button to advance to next question
+- **No Enter Navigation**: Enter key disabled during review state
+
+### State Transitions
+- **Answering → Reviewing**: Automatically when AI feedback is received
+- **Reviewing → Answering**: When "Go to Next Question" is clicked, clears answer and returns to State A
+
 ## 🔧 API Integration
 
 ### OpenAI Configuration
 
-The application uses OpenAI's GPT-3.5-turbo model for generating structured feedback. The API endpoint (`/api/feedback`) expects:
+The application uses OpenAI's GPT-4o-mini model for generating structured feedback. The API endpoint (`/api/feedback`) expects:
 
 **Request Body:**
 ```json
@@ -138,7 +170,10 @@ The application uses OpenAI's GPT-3.5-turbo model for generating structured feed
   "strengths": ["Strength 1", "Strength 2"],
   "areasToImprove": ["Area 1", "Area 2"],
   "nextStep": "Specific actionable advice",
-  "score": 85,
+  "quality": 85,
+  "relevance": 90,
+  "addressed": true,
+  "score": 87,
   "motivationalPhrase": "Great job!"
 }
 ```
@@ -261,5 +296,3 @@ With more development time, the following enhancements could be implemented:
 ---
 
 **Built with ❤️ for aspiring medical students**
-
-For support or questions, please open an issue on GitHub or contact the development team.
