@@ -1,103 +1,189 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useState, useCallback } from 'react';
+import Header from '@/components/Header';
+import ProgressIndicator from '@/components/ProgressIndicator';
+import QuestionDisplay from '@/components/QuestionDisplay';
+import AnswerInput from '@/components/AnswerInput';
+import FeedbackDisplay from '@/components/FeedbackDisplay';
+import FinalResults from '@/components/FinalResults';
+import { INTERVIEW_QUESTIONS, TOTAL_QUESTIONS } from '@/data/questions';
+import { AppState, AnswerWithFeedback, FeedbackResponse } from '@/types';
+
+// Main application component managing the interview practice flow
+export default function HomePage() {
+  // Application state management
+  const [appState, setAppState] = useState<AppState>({
+    currentQuestionIndex: 0,
+    answers: [],
+    isSubmitting: false,
+    error: null,
+    isCompleted: false,
+    totalScore: 0,
+  });
+
+  // Get current question
+  const currentQuestion = INTERVIEW_QUESTIONS[appState.currentQuestionIndex];
+
+  // Handle answer submission and API call
+  const handleAnswerSubmit = useCallback(async (answer: string) => {
+    setAppState(prev => ({ ...prev, isSubmitting: true, error: null }));
+
+    try {
+      // Prepare request data for the API
+      const requestData = {
+        question: currentQuestion.text,
+        answer: answer,
+        questionNumber: appState.currentQuestionIndex + 1,
+        totalQuestions: TOTAL_QUESTIONS,
+      };
+
+      // Call the feedback API
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Parse the feedback response
+      const feedback: FeedbackResponse = await response.json();
+
+      // Create answer with feedback object
+      const answerWithFeedback: AnswerWithFeedback = {
+        questionId: currentQuestion.id,
+        question: currentQuestion.text,
+        answer: answer,
+        feedback: feedback,
+        timestamp: new Date(),
+      };
+
+      // Update application state with new answer
+      setAppState(prev => ({
+        ...prev,
+        answers: [...prev.answers, answerWithFeedback],
+        totalScore: prev.totalScore + feedback.score,
+        isSubmitting: false,
+        error: null,
+      }));
+
+    } catch (error) {
+      console.error('Error submitting answer:', error);
+      
+      // Set user-friendly error message
+      const errorMessage = error instanceof Error 
+        ? 'Sorry, there was an issue getting your feedback. Please try again.'
+        : 'An unexpected error occurred. Please try again.';
+      
+      setAppState(prev => ({
+        ...prev,
+        isSubmitting: false,
+        error: errorMessage,
+      }));
+    }
+  }, [currentQuestion, appState.currentQuestionIndex]);
+
+  // Handle moving to next question
+  const handleNextQuestion = useCallback(() => {
+    const nextIndex = appState.currentQuestionIndex + 1;
+    
+    if (nextIndex >= TOTAL_QUESTIONS) {
+      // Mark session as completed
+      setAppState(prev => ({ ...prev, isCompleted: true }));
+    } else {
+      // Move to next question
+      setAppState(prev => ({ ...prev, currentQuestionIndex: nextIndex }));
+    }
+  }, [appState.currentQuestionIndex]);
+
+  // Handle restarting the practice session
+  const handleRestart = useCallback(() => {
+    setAppState({
+      currentQuestionIndex: 0,
+      answers: [],
+      isSubmitting: false,
+      error: null,
+      isCompleted: false,
+      totalScore: 0,
+    });
+  }, []);
+
+  // Render different views based on application state
+  if (appState.isCompleted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <FinalResults
+            totalScore={appState.totalScore}
+            answers={appState.answers}
+            onRestart={handleRestart}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  // Check if we're showing feedback for the current question
+  const currentAnswer = appState.answers.find(
+    answer => answer.questionId === currentQuestion.id
+  );
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      <Header />
+      
+      <main className="container mx-auto px-4 py-8">
+        {/* Progress indicator */}
+        <ProgressIndicator
+          currentQuestion={appState.currentQuestionIndex + 1}
+          totalQuestions={TOTAL_QUESTIONS}
         />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+        {/* Question display */}
+        <QuestionDisplay
+          question={currentQuestion}
+          questionNumber={appState.currentQuestionIndex + 1}
+          totalQuestions={TOTAL_QUESTIONS}
+        />
+
+        {/* Conditional rendering based on whether feedback is available */}
+        {currentAnswer ? (
+          // Show feedback if available
+          <div className="space-y-6">
+            <FeedbackDisplay
+              feedback={currentAnswer.feedback}
+              questionNumber={appState.currentQuestionIndex + 1}
+              totalQuestions={TOTAL_QUESTIONS}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+            
+            {/* Continue button */}
+            <div className="flex justify-center">
+              <button
+                onClick={handleNextQuestion}
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              >
+                {appState.currentQuestionIndex + 1 >= TOTAL_QUESTIONS 
+                  ? 'View Results' 
+                  : 'Continue to Next Question'
+                }
+              </button>
+            </div>
+          </div>
+        ) : (
+          // Show answer input if no feedback yet
+          <AnswerInput
+            onSubmit={handleAnswerSubmit}
+            isSubmitting={appState.isSubmitting}
+            error={appState.error}
+          />
+        )}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
